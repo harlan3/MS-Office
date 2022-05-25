@@ -1,0 +1,65 @@
+Sub genAcronyms
+
+Application.ScreenUpdating = False
+Dim StrTmp As String, StrAcronyms As String, i As Long, j As Long, k As Long, Rng As Range, Tbl As Table
+StrAcronyms = "Acronym" & vbTab & "Term" & vbTab & vbCr
+With ActiveDocument
+  With .Range
+    With .Find
+      .ClearFormatting
+      .Replacement.ClearFormatting
+      .MatchWildcards = True
+      .Wrap = wdFindStop
+      .Text = "\([a-zA-Z0-9]{2,}\)"
+      .Replacement.Text = ""
+      .Execute
+    End With
+    Do While .Find.Found = True
+      StrTmp = Replace(Replace(.Text, "(", ""), ")", "")
+      If (InStr(1, StrAcronyms, .Text, vbBinaryCompare) = 0) And (Not IsNumeric(StrTmp)) Then
+        If .Words.First.Previous.Previous.Words(1).Characters.First = Right(StrTmp, 1) Then
+          For i = Len(StrTmp) To 1 Step -1
+            .MoveStartUntil Mid(StrTmp, i, 1), wdBackward
+            .Start = .Start - 1
+            If InStr(.Text, vbCr) > 0 Then
+              .MoveStartUntil vbCr, wdForward
+              .Start = .Start + 1
+            End If
+            If .Sentences.Count > 1 Then .Start = .Sentences.Last.Start
+            If .Characters.Last.Information(wdWithInTable) = False Then
+              If .Characters.First.Information(wdWithInTable) = True Then
+                .Start = .Cells(.Cells.Count).Range.End + 1
+              End If
+            ElseIf .Cells.Count > 1 Then
+              .Start = .Cells(.Cells.Count).Range.Start
+            End If
+          Next
+        End If
+        StrTmp = Replace(Replace(Replace(.Text, " (", "("), "(", "|"), ")", "")
+        StrAcronyms = StrAcronyms & Split(StrTmp, "|")(1) & vbTab & Split(StrTmp, "|")(0) & vbCr
+      End If
+      .Collapse wdCollapseEnd
+      .Find.Execute
+    Loop
+  End With
+  StrAcronyms = Replace(Replace(Replace(StrAcronyms, " (", "("), "(", vbTab), ")", "")
+  Set Rng = ActiveDocument.Range.Characters.Last
+  With Rng
+    If .Characters.First.Previous <> vbCr Then .InsertAfter vbCr
+    .InsertAfter Chr(12)
+    .Collapse wdCollapseEnd
+    .Style = "Normal"
+    .Text = StrAcronyms
+    Set Tbl = .ConvertToTable(Separator:=vbTab, NumRows:=.Paragraphs.Count, NumColumns:=2)
+    With Tbl
+      .Columns.AutoFit
+      .Rows(1).HeadingFormat = True
+      .Rows(1).Range.Style = "Strong"
+      .Rows.Alignment = wdAlignRowCenter
+    End With
+    .Collapse wdCollapseStart
+  End With
+End With
+Set Rng = Nothing: Set Tbl = Nothing
+Application.ScreenUpdating = True
+End Sub
