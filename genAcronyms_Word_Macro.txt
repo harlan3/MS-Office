@@ -1,4 +1,4 @@
-Sub genAcronyms
+Sub genAcronyms()
 
 Application.ScreenUpdating = False
 Dim StrTmp As String, StrAcronyms As String, i As Long, j As Long, k As Long, Rng As Range, Tbl As Table
