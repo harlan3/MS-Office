@@ -1,9 +1,15 @@
 Sub genAcronyms()
 
 Application.ScreenUpdating = False
-Dim StrTmp As String, StrAcronyms As String, i As Long, j As Long, k As Long, Rng As Range, Tbl As Table
+Dim StrTmp As String, StrAcronyms As String, i As Long, j As Long, k As Long, Rng As Range
 StrAcronyms = "Acronym" & vbTab & "Term" & vbTab & vbCr
-With ActiveDocument
+Dim oDoc_Source As Document
+Dim oDoc_Target As Document
+Dim oTable As Table
+Dim tr As Range
+Set oDoc_Source = ActiveDocument
+Set oDoc_Target = Documents.Add
+With oDoc_Source
   With .Range
     With .Find
       .ClearFormatting
@@ -43,23 +49,24 @@ With ActiveDocument
     Loop
   End With
   StrAcronyms = Replace(Replace(Replace(StrAcronyms, " (", "("), "(", vbTab), ")", "")
-  Set Rng = ActiveDocument.Range.Characters.Last
+  Set Rng = oDoc_Source.Range.Characters.Last
   With Rng
-    If .Characters.First.Previous <> vbCr Then .InsertAfter vbCr
-    .InsertAfter Chr(12)
     .Collapse wdCollapseEnd
     .Style = "Normal"
     .Text = StrAcronyms
-    Set Tbl = .ConvertToTable(Separator:=vbTab, NumRows:=.Paragraphs.Count, NumColumns:=2)
-    With Tbl
-      .Columns.AutoFit
-      .Rows(1).HeadingFormat = True
-      .Rows(1).Range.Style = "Strong"
-      .Rows.Alignment = wdAlignRowCenter
+    Set oTable = .ConvertToTable(Separator:=vbTab, numrows:=.Paragraphs.Count, NumColumns:=2)
+    With oTable
+        Set tr = oDoc_Target.Range
+        tr.Collapse wdCollapseEnd
+        tr.FormattedText = oTable.Range.FormattedText
+        tr.Collapse wdCollapseEnd
+        tr.Text = vbCrLf
+        .Delete
     End With
     .Collapse wdCollapseStart
+    End With
   End With
-End With
-Set Rng = Nothing: Set Tbl = Nothing
+oDoc_Target.Tables.Item(1).Rows(1).HeadingFormat = True
+oDoc_Target.Tables.Item(1).Rows(1).Range.Font.Bold = True
 Application.ScreenUpdating = True
 End Sub
