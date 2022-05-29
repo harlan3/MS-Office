@@ -16,7 +16,7 @@ With oDoc_Source
       .Replacement.ClearFormatting
       .MatchWildcards = True
       .Wrap = wdFindStop
-      .Text = "\([a-zA-Z0-9]{2,}\)"
+      .Text = "\([a-zA-Z0-9][a-z&A-Z&0-9]{1" & Application.International(wdListSeparator) & "}\)"
       .Replacement.Text = ""
       .Execute
     End With
