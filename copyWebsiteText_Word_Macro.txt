@@ -1,0 +1,53 @@
+Option Explicit
+
+' References Microsoft HTML Object Library
+' References Microsoft Forms 2.0 Object Library
+
+Private Declare PtrSafe Function URLDownloadToFile Lib "urlmon" Alias "URLDownloadToFileA" _
+        (ByVal pCaller As Long, ByVal szURL As String, ByVal szFileName As String, _
+        ByVal dwReserved As Long, ByVal lpfnCB As Long) As Long
+
+
+Sub copyWebsiteText()
+
+    Application.ScreenUpdating = False
+    Dim oDoc As Word.Document
+    Dim clipboard As MSForms.DataObject
+    Dim fso As Object
+    Set fso = CreateObject("Scripting.FileSystemObject")
+
+    Dim sLocalFilename As String
+    sLocalFilename = Environ$("TMP") & "\urlmon.html"
+
+    Dim sURL As String
+    sURL = "https://github.com/harlan3/MS-Office-Macros/blob/main/copyWebsiteText_Word_Macro.txt"
+
+    Dim bOk As Boolean
+    bOk = (URLDownloadToFile(0, sURL, sLocalFilename, 0, 0) = 0)
+    If bOk Then
+        If fso.FileExists(sLocalFilename) Then
+
+            Dim oHtml4 As MSHTML.IHTMLDocument4
+            Set oHtml4 = New MSHTML.HTMLDocument
+
+            Dim oHtml As MSHTML.HTMLDocument
+            Set oHtml = oHtml4.createDocumentFromUrl(sLocalFilename, "")
+
+            '* need to wait a little while the document parses
+            '* because it is multithreaded
+            While oHtml.readyState <> "complete"
+                DoEvents  '* do not comment this out it is required to break into the code if in infinite loop
+            Wend
+            Debug.Assert oHtml.readyState = "complete"
+
+            Set clipboard = New MSForms.DataObject
+            clipboard.SetText (oHtml.body.innerText)
+            clipboard.PutInClipboard
+            
+            Set oDoc = Documents.Add
+            oDoc.Content.Paste
+            
+        End If
+    End If
+    Application.ScreenUpdating = True
+End Sub
