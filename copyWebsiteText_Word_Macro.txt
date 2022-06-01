@@ -13,6 +13,7 @@ Sub copyWebsiteText()
     Application.ScreenUpdating = False
     Dim oDoc As Word.Document
     Dim clipboard As MSForms.DataObject
+    Dim oRng As Word.Range
     Dim fso As Object
     Set fso = CreateObject("Scripting.FileSystemObject")
 
@@ -40,12 +41,21 @@ Sub copyWebsiteText()
             Wend
             Debug.Assert oHtml.readyState = "complete"
 
+            Set oRng = ActiveDocument.Range
+            oRng.Text = oHtml.body.innerText
+            If oRng.Characters.Last = Chr(13) Or oRng.Characters.Last = Chr(11) Then
+                oRng.End = oRng.End - 1
+            End If
+            oRng.Text = Replace(Replace(oRng.Text, Chr(11), " "), Chr(13), " ")
+
             Set clipboard = New MSForms.DataObject
-            clipboard.SetText (oHtml.body.innerText)
+            clipboard.SetText (oRng.Text)
             clipboard.PutInClipboard
             
             Set oDoc = Documents.Add
             oDoc.Content.Paste
+            
+            oRng.Delete
             
         End If
     End If
