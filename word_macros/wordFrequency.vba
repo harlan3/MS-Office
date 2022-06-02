@@ -1,3 +1,5 @@
+Option Explicit
+
 Sub WordFrequency()
 
     Application.ScreenUpdating = False

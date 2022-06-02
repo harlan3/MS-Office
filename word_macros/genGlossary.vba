@@ -1,3 +1,5 @@
+Option Explicit
+
 Sub genGlossary()
 
 Application.ScreenUpdating = False

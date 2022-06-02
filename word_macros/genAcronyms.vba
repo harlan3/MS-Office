@@ -1,3 +1,5 @@
+Option Explicit
+
 Sub genAcronyms()
 
 Application.ScreenUpdating = False
