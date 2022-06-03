@@ -8,6 +8,7 @@ Dim objDocA As Word.Document, objDocB As Word.Document
 
 strFolderA = "C:\test_folder\folderA\"
 strFolderB = "C:\test_folder\folderB\"
+'strFileSpec = "*.txt"
 strFileSpec = "*.doc*"
 strFileName = Dir(strFolderA & strFileSpec)
 
